@@ -62,11 +62,12 @@ export async function POST(req: Request) {
         "Content-Disposition": `attachment; filename="resume.pdf"`,
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Helpful server logs
     console.error("Compile error:", err);
+    const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json(
-      { error: err?.message ?? "Unknown error" },
+      { error: message },
       { status: 400 }
     );
   }
