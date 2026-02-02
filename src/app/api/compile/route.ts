@@ -9,8 +9,11 @@ import os from "os";
 function run(cmd: string, args: string[], cwd: string, timeoutMs: number) {
   return new Promise<void>((resolve, reject) => {
     const p = spawn(cmd, args, { cwd });
+
+    let stdout = "";
     let stderr = "";
 
+    p.stdout.on("data", (d) => (stdout += d.toString()));
     p.stderr.on("data", (d) => (stderr += d.toString()));
 
     const t = setTimeout(() => {
@@ -18,10 +21,15 @@ function run(cmd: string, args: string[], cwd: string, timeoutMs: number) {
       reject(new Error(`LaTeX compile timeout after ${timeoutMs}ms`));
     }, timeoutMs);
 
+    p.on("error", (e) => {
+      clearTimeout(t);
+      reject(new Error(`Failed to start '${cmd}': ${e.message}`));
+    });
+
     p.on("close", (code) => {
       clearTimeout(t);
       if (code === 0) return resolve();
-      reject(new Error(`LaTeX failed (code ${code}).\n${stderr}`));
+      reject(new Error(`LaTeX failed (code ${code}).\n${stderr}\n${stdout}`));
     });
   });
 }
@@ -31,11 +39,13 @@ export async function POST(req: Request) {
     const json = await req.json();
     const data = resumeSchema.parse(json);
 
-    const tex = await renderLatex(data);
+    // renderLatex is now synchronous (no Handlebars)
+    const tex = renderLatex(data);
 
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "resume-"));
     await fs.writeFile(path.join(tmpDir, "resume.tex"), tex, "utf8");
 
+    // If macOS PATH causes trouble, replace "latexmk" with "/Library/TeX/texbin/latexmk"
     await run(
       "latexmk",
       ["-pdf", "-interaction=nonstopmode", "-halt-on-error", "-no-shell-escape", "resume.tex"],
@@ -53,6 +63,11 @@ export async function POST(req: Request) {
       },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err?.message ?? "Unknown error" }, { status: 400 });
+    // Helpful server logs
+    console.error("Compile error:", err);
+    return NextResponse.json(
+      { error: err?.message ?? "Unknown error" },
+      { status: 400 }
+    );
   }
 }

@@ -1,6 +1,3 @@
-import Handlebars from "handlebars";
-import fs from "fs/promises";
-import path from "path";
 import type { ResumeData } from "./resumeSchema";
 
 export function escapeLatex(input: string): string {
@@ -17,45 +14,51 @@ export function escapeLatex(input: string): string {
     .replace(/\^/g, "\\textasciicircum{}");
 }
 
-function sanitize(data: ResumeData): ResumeData {
-  const esc = (s?: string) => escapeLatex((s ?? "").trim());
-  return {
-    ...data,
-    basics: {
-      ...data.basics,
-      name: esc(data.basics.name),
-      email: esc(data.basics.email ?? ""),
-      phone: esc(data.basics.phone ?? ""),
-      location: esc(data.basics.location ?? ""),
-      summary: esc(data.basics.summary ?? ""),
-    },
-    education: (data.education ?? []).map(e => ({
-      ...e,
-      school: esc(e.school),
-      degree: esc(e.degree),
-      dates: esc(e.dates ?? ""),
-      details: (e.details ?? []).map(esc),
-    })),
-    experience: (data.experience ?? []).map(x => ({
-      ...x,
-      company: esc(x.company),
-      role: esc(x.role),
-      dates: esc(x.dates ?? ""),
-      location: esc(x.location ?? ""),
-      bullets: (x.bullets ?? []).map(esc),
-    })),
-    skills: (data.skills ?? []).map(s => ({
-      ...s,
-      group: esc(s.group),
-      items: (s.items ?? []).map(esc),
-    })),
-  };
+function s(x?: string) {
+  return escapeLatex((x ?? "").trim());
 }
 
-export async function renderLatex(data: ResumeData): Promise<string> {
-  const safe = sanitize(data);
-  const tplPath = path.join(process.cwd(), "templates", "resume.tex.hbs");
-  const source = await fs.readFile(tplPath, "utf8");
-  const template = Handlebars.compile(source, { noEscape: true });
-  return template(safe);
+export function renderLatex(data: ResumeData): string {
+  const name = s(data.basics.name);
+  const email = s(data.basics.email ?? "");
+  const phone = s(data.basics.phone ?? "");
+  const location = s(data.basics.location ?? "");
+  const summary = s(data.basics.summary ?? "");
+
+  const headerParts = [location, phone, email].filter(Boolean).join(" \\;|\\; ");
+
+  // Note: Use \\texttt{...} for email, but no templating braces exist anywhere.
+  const emailLine =
+    email.length > 0
+      ? `\\\\ \\href{mailto:${email}}{\\texttt{${email}}}`
+      : "";
+
+  const summaryBlock =
+    summary.length > 0
+      ? `\\vspace{6pt}\n${summary}\n`
+      : "";
+
+  return String.raw`
+\documentclass[11pt]{article}
+\usepackage[margin=1.3cm]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+
+\setlist[itemize]{noitemsep, topsep=2pt, leftmargin=*}
+\titleformat{\section}{\large\bfseries}{}{0em}{}[\titlerule]
+\hypersetup{colorlinks=true, urlcolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\LARGE \textbf{${name}}}\\
+\vspace{2pt}
+${headerParts}
+${emailLine}
+\end{center}
+
+${summaryBlock}
+\end{document}
+`.trim();
 }
