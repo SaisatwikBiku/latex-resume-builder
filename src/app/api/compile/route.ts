@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { resumeSchema } from "@/lib/resumeSchema";
 import { renderLatex } from "@/lib/latex";
 import { spawn } from "child_process";
@@ -36,6 +37,11 @@ function run(cmd: string, args: string[], cwd: string, timeoutMs: number) {
 
 export async function POST(req: Request) {
   try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const json = await req.json();
     const data = resumeSchema.parse(json);
 

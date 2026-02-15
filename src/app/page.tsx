@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { signOut, useSession } from "next-auth/react";
 import type { ResumeData } from "@/lib/resumeSchema";
 import ResumeForm from "@/components/ResumeForm";
 import ResumePreview from "@/components/ResumePreview";
@@ -16,8 +17,13 @@ const defaultData: ResumeData = {
 };
 
 export default function Page() {
+  const { data: session, status } = useSession();
   const [data, setData] = useState<ResumeData>(defaultData);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoadingResume, setIsLoadingResume] = useState(true);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const hasLoadedResume = useRef(false);
+  const isHydratingFromServer = useRef(false);
 
   async function generatePdf() {
     setIsGenerating(true);
@@ -48,12 +54,98 @@ export default function Page() {
     }
   }
 
+  useEffect(() => {
+    if (status !== "authenticated" || hasLoadedResume.current) return;
+
+    let isActive = true;
+
+    async function loadResume() {
+      setIsLoadingResume(true);
+      try {
+        const res = await fetch("/api/resume", { method: "GET" });
+        if (!res.ok) throw new Error("Failed to load resume.");
+
+        const payload = await res.json();
+        if (payload?.data && isActive) {
+          isHydratingFromServer.current = true;
+          setData(payload.data);
+          queueMicrotask(() => {
+            isHydratingFromServer.current = false;
+          });
+        }
+      } catch {
+        if (isActive) setSaveState("error");
+      } finally {
+        if (isActive) {
+          hasLoadedResume.current = true;
+          setIsLoadingResume(false);
+        }
+      }
+    }
+
+    void loadResume();
+
+    return () => {
+      isActive = false;
+    };
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    if (!hasLoadedResume.current || isLoadingResume || isHydratingFromServer.current) return;
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setSaveState("saving");
+      try {
+        const res = await fetch("/api/resume", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error("Failed to save resume.");
+        setSaveState("saved");
+      } catch {
+        if (!controller.signal.aborted) {
+          setSaveState("error");
+        }
+      }
+    }, 900);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [data, status, isLoadingResume]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header */}
       <header className="border-b border-slate-200 bg-white/90 backdrop-blur-md shadow-sm">
         <div className="mx-auto max-w-[1920px] px-4 py-6 sm:px-6 sm:py-10 lg:px-8 xl:px-12 2xl:px-16">
+          <div className="mb-6 flex items-center justify-end gap-3 sm:mb-8">
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+              {isLoadingResume
+                ? "Loading draft..."
+                : saveState === "saving"
+                  ? "Saving..."
+                  : saveState === "saved"
+                    ? "All changes saved"
+                    : saveState === "error"
+                      ? "Save failed"
+                      : "Draft ready"}
+            </span>
+            <span className="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 sm:inline-flex">
+              {status === "loading" ? "Loading session..." : session?.user?.email ?? "Signed in"}
+            </span>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Logout
+            </button>
+          </div>
           <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3">
             <div className="flex items-center justify-center h-12 w-12 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg">
               <svg className="h-6 w-6 sm:h-7 sm:w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
