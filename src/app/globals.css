@@ -50,3 +50,19 @@ body {
   background: rgba(15, 23, 42, 0.3);
 }
 
+@keyframes landingCarousel {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-50% - 0.375rem));
+  }
+}
+
+.landing-carousel-track {
+  animation: landingCarousel 32s linear infinite;
+}
+
+.landing-carousel-track:hover {
+  animation-play-state: paused;
+}

@@ -50,26 +50,53 @@ const faqs = [
   },
 ];
 
+const testimonials = [
+  {
+    quote:
+      "I finally stopped duplicating random resume files. Repositories plus commits make role targeting much cleaner.",
+    name: "Aarav S.",
+    role: "Software Engineer",
+  },
+  {
+    quote:
+      "The live editing flow is fast, and the final PDF quality is exactly what I need for applications.",
+    name: "Maya R.",
+    role: "Data Analyst",
+  },
+  {
+    quote:
+      "I keep one repo per job track and reuse commit history when tailoring experience bullets.",
+    name: "David K.",
+    role: "Product Manager",
+  },
+  {
+    quote:
+      "This feels like Git for resumes. It is easier to maintain versions without losing good drafts.",
+    name: "Neha P.",
+    role: "Graduate Student",
+  },
+];
+
 export default async function LandingPage() {
   const session = await auth();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#d9f5ee_0%,#f8fafc_42%,#ffffff_100%)] text-slate-900">
-      <header className="mx-auto flex w-full max-w-[1100px] items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+      <header className="mx-auto flex w-full max-w-[1100px] flex-col items-start justify-between gap-3 px-4 py-5 sm:flex-row sm:items-center sm:gap-2 sm:px-6 lg:px-8">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">LaTeX Resume Builder</p>
           <h1 className="text-lg font-bold">Version control for your resume</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
           <Link
             href={session ? "/repositories" : "/login"}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="whitespace-nowrap rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
           >
             {session ? "Open App" : "Login"}
           </Link>
           <Link
             href={session ? "/repositories" : "/register"}
-            className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
+            className="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
           >
             {session ? "Go to Repositories" : "Create account"}
           </Link>
@@ -147,6 +174,34 @@ export default async function LandingPage() {
       </section>
 
       <section className="mx-auto w-full max-w-[1100px] px-4 pb-8 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 p-5 shadow-xl shadow-slate-300/60 sm:p-6">
+          <div className="pointer-events-none absolute -left-16 -top-20 h-52 w-52 rounded-full bg-teal-400/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 right-10 h-52 w-52 rounded-full bg-cyan-400/20 blur-3xl" />
+          <div className="relative flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-300">Testimonials</p>
+            <span className="text-xs text-slate-300">Trusted by active job seekers</span>
+          </div>
+          <div className="relative mt-5 overflow-hidden">
+            <div className="landing-carousel-track flex w-max gap-4">
+              {[...testimonials, ...testimonials].map((item, index) => (
+                <article
+                  key={`${item.name}-${index}`}
+                  className={`w-[300px] shrink-0 rounded-2xl border border-white/20 bg-white/10 p-5 shadow-lg backdrop-blur ${
+                    index % 2 === 0 ? "mt-0" : "mt-3"
+                  }`}
+                >
+                  <p className="text-2xl leading-none text-teal-300">“</p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-100">{item.quote}</p>
+                  <p className="mt-4 text-sm font-semibold text-white">{item.name}</p>
+                  <p className="text-xs text-slate-300">{item.role}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-[1100px] px-4 pb-8 sm:px-6 lg:px-8">
         <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">FAQ</p>
@@ -169,7 +224,7 @@ export default async function LandingPage() {
             <div className="mt-5 flex flex-wrap gap-2">
               <Link
                 href={session ? "/repositories" : "/register"}
-                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100"
+                className="whitespace-nowrap rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100"
               >
                 {session ? "Open app" : "Create account"}
               </Link>
