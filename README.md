@@ -1,119 +1,141 @@
 # LaTeX Resume Builder
 
-A modern resume builder that generates professional PDF resumes using LaTeX. Fill in your information, preview in real-time, and download a perfectly formatted PDF.
+A full-stack resume platform with a Git-style workflow:
+- create multiple resume repositories,
+- commit versions over time,
+- edit historical commits,
+- and export polished LaTeX PDFs.
 
-## Quick Start
+It combines fast in-app editing (HTML preview) with high-quality final output (LaTeX compilation).
 
-### Prerequisites
+## Live Product Flow
+
+1. **Landing page** (`/`) introduces the workflow.
+2. **Auth** (`/login`, `/register`) with credentials.
+3. **Repositories** (`/repositories`) shows all resume repos for the user.
+4. **Workspace** (`/repositories/[repoId]`) for editing + committing + downloading PDF.
+5. **Commits list** (`/repositories/[repoId]/commits`) for version history.
+6. **Commit editor** (`/repositories/[repoId]/commits/[commitId]`) to modify/export a specific version.
+
+## Core Features
+
+- Repository-based resume management (role/company specific resumes)
+- Commit-style version history
+- Rename/delete repositories
+- Rename/download commits (no commit delete in UI)
+- Structured resume form (experience, education, projects, skills, etc.)
+- Live preview while editing
+- Authenticated PDF compile API using LaTeX
+- User-scoped data in MongoDB
+
+## Tech Stack
+
+- **Frontend/App**: Next.js 16 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS 4
+- **Validation**: Zod
+- **Auth**: NextAuth/Auth.js + credentials + Mongo adapter
+- **Database**: MongoDB
+- **PDF Engine**: LaTeX (`latexmk`/`pdflatex`)
+- **Quality**: ESLint
+
+## Prerequisites
+
 - Node.js 20+
-- LaTeX distribution:
-  - **macOS**: [MacTeX](https://www.tug.org/mactex/)
-  - **Linux**: `sudo apt-get install texlive-full`
-  - **Windows**: [MiKTeX](https://miktex.org/)
+- MongoDB database
+- LaTeX toolchain
+  - macOS: [MacTeX](https://www.tug.org/mactex/)
+  - Debian/Ubuntu: `sudo apt-get install texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-pictures latexmk`
+  - Windows: [MiKTeX](https://miktex.org/) (ensure `latexmk`/`pdflatex` in PATH)
 
-### Installation & Running
+## Local Setup
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
 
-### Environment Variables
+Open [http://localhost:3000](http://localhost:3000).
+
+## Environment Variables
 
 Create `.env.local`:
 
 ```env
-MONGODB_URI="mongodb+srv://<user>:<password>@<cluster>/<db>?retryWrites=true&w=majority"
-MONGODB_DB="latex_resume_builder"
-AUTH_SECRET="<long-random-secret>"
-AUTH_URL="http://localhost:3000"
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/<db>?retryWrites=true&w=majority
+MONGODB_DB=latex_resume_builder
+AUTH_SECRET=<long-random-secret>
+AUTH_URL=http://localhost:3000
+AUTH_TRUST_HOST=true
 ```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## How It Works
-
-1. **Register/Login** - Authenticate with email/password
-2. **Fill** - Enter your resume information (experience, education, skills, etc.)
-3. **Preview** - See real-time HTML preview as you type
-4. **Auto-save** - Draft is saved to MongoDB for your account
-5. **Download** - Generate and download a professional PDF
-
-## Features
-
-- ✨ Real-time preview
-- 📄 Professional LaTeX PDF output
-- 📱 Fully responsive (mobile & desktop)
-- 🎨 Clean, modern interface
-- 🔐 User registration and login
-- 💾 Per-user draft persistence (auto-save)
-- ✅ Type-safe with TypeScript & Zod validation
-
-## Resume Sections
-
-- Personal Information (name, email, phone, location, website, summary)
-- Work Experience with bullet points
-- Education
-- Projects
-- Skills (grouped by category)
-- Certifications
-- Languages
-
-## Project Structure
-
-```
-src/
-├── auth.ts                  # Auth.js config
-├── app/
-│   ├── page.tsx              # Main layout
-│   └── api/
-│       ├── auth/             # Login/register/auth routes
-│       ├── resume/route.ts   # Resume load/save endpoint
-│       └── compile/route.ts  # PDF compilation endpoint (authenticated)
-├── components/
-│   ├── ResumeForm.tsx        # Form for editing resume
-│   └── ResumePreview.tsx     # Live preview component
-└── lib/
-    ├── latex.ts             # LaTeX document generator
-    ├── resumeSchema.ts      # Data validation schema
-    ├── mongodb.ts           # Mongo client singleton
-    └── db.ts                # DB accessor
-```
-
-## Tech Stack
-
-- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
-- **Validation**: Zod
-- **Auth**: Auth.js (credentials), bcryptjs
-- **Database**: MongoDB
-- **PDF**: LaTeX (pdflatex)
-- **Build**: PostCSS, ESLint
 
 ## Scripts
 
 ```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm start        # Start production server
-npm run lint     # Run linting
+npm run dev      # Development
+npm run build    # Production build
+npm run start    # Production server
+npm run lint     # Lint
 ```
 
-## Troubleshooting
+## Docker / Deployment Notes
 
-**LaTeX not found?**
-- Install LaTeX distribution from prerequisites above
+- The app includes a `Dockerfile` with TeX dependencies preinstalled.
+- `npm start` binds to `0.0.0.0` and uses `PORT` (fallback `3000`).
+- Required runtime env vars: `MONGODB_URI`, `MONGODB_DB`, `AUTH_SECRET`, `AUTH_URL`, `AUTH_TRUST_HOST`.
+- If compile fails in cloud:
+  - verify `latexmk -v` inside container,
+  - ensure enough memory,
+  - inspect `POST /api/compile` error body.
 
-**PDF generation timeout?**
-- Ensure LaTeX is installed and works: `pdflatex --version`
+## API Surface (High-Level)
 
-## Security Notes
+- `POST /api/auth/register` - create user
+- `GET/POST /api/repositories` - list/create repositories
+- `GET/PUT/DELETE /api/repositories/[repoId]` - repo operations
+- `GET/POST /api/repositories/[repoId]/versions` - list/create commits
+- `GET/PUT /api/repositories/[repoId]/versions/[versionId]` - commit fetch/update
+- `POST /api/compile` - compile LaTeX PDF (authenticated)
 
-- Auth-protected app routes are enforced through `src/proxy.ts`.
-- `POST /api/compile` requires an authenticated session.
-- Registration and login attempts are rate limited in-memory.
+## Security
+
+- Protected routes enforced by `src/proxy.ts`
+- Auth required for app pages and compile endpoint
+- Input validation with Zod
+- Rate limiting for registration/login
+
+## Project Structure
+
+```text
+src/
+  app/
+    page.tsx                                    # Landing page
+    login/page.tsx                              # Login
+    register/page.tsx                           # Register
+    repositories/page.tsx                       # Repositories list
+    repositories/[repoId]/page.tsx              # Workspace
+    repositories/[repoId]/commits/page.tsx      # Commit history
+    repositories/[repoId]/commits/[commitId]/page.tsx  # Commit editor
+    api/
+      auth/[...nextauth]/route.ts
+      auth/register/route.ts
+      repositories/...                          # Repo + version APIs
+      compile/route.ts                          # LaTeX compile API
+  components/
+    ResumeForm.tsx
+    ResumePreview.tsx
+    AuthSessionProvider.tsx
+  lib/
+    db.ts
+    mongodb.ts
+    resumeSchema.ts
+    latex.ts
+```
+
+## Current Status
+
+- End-to-end repository + commit workflow is implemented.
+- UI is responsive and aligned with the landing visual style.
+- Production-hardening still recommended: monitoring, automated tests, and queued PDF compilation for scale.
 
 ## License
 

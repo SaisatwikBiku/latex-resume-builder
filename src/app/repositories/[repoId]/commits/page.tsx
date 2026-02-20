@@ -116,8 +116,8 @@ export default function CommitsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#d9f5ee_0%,#f8fafc_42%,#ffffff_100%)] text-slate-900">
+      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/85 backdrop-blur">
         <div className="mx-auto max-w-[1100px] px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -126,18 +126,18 @@ export default function CommitsPage() {
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
-              className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
               Logout
             </button>
           </div>
           <div className="mt-2 flex items-center gap-2 overflow-x-auto pb-1 sm:gap-3 sm:overflow-visible sm:pb-0">
-            <Link href="/" className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+            <Link href="/repositories" className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
               Repositories
             </Link>
             <Link
               href={`/repositories/${repoId}`}
-              className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
               Workspace
             </Link>
@@ -145,8 +145,8 @@ export default function CommitsPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1100px] px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <main className="mx-auto max-w-[1100px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+        <section className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-lg shadow-slate-200/60 backdrop-blur sm:p-5">
           {error && <p className="mb-3 text-sm text-rose-700">{error}</p>}
 
           {isLoading ? (
@@ -158,7 +158,7 @@ export default function CommitsPage() {
               {commits.map((commit) => (
                 <div
                   key={commit.id}
-                  className="relative flex flex-col gap-3 rounded-lg border border-slate-200 p-3 sm:flex-row sm:items-center sm:justify-between"
+                  className="relative flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0">
                     <Link
@@ -179,7 +179,7 @@ export default function CommitsPage() {
                     </button>
                   </div>
                   {openMenuCommitId === commit.id && (
-                    <div className="absolute right-3 top-10 z-10 w-36 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
+                    <div className="absolute right-3 top-10 z-10 w-36 rounded-lg border border-slate-200 bg-white p-1 shadow-lg shadow-slate-300/40">
                       <button
                         onClick={() => {
                           setOpenMenuCommitId(null);

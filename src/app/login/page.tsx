@@ -9,8 +9,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-10">
-          <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <main className="min-h-screen bg-[radial-gradient(circle_at_top,#d9f5ee_0%,#f8fafc_42%,#ffffff_100%)] px-4 py-10">
+          <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200/80 bg-white/90 p-8 shadow-lg shadow-slate-200/60 backdrop-blur">
             <p className="text-sm text-slate-600">Loading...</p>
           </div>
         </main>
@@ -24,7 +24,7 @@ export default function LoginPage() {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || "/repositories";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,8 +63,8 @@ function LoginForm() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-10">
-      <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#d9f5ee_0%,#f8fafc_42%,#ffffff_100%)] px-4 py-10">
+      <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200/80 bg-white/90 p-8 shadow-lg shadow-slate-200/60 backdrop-blur">
         <p className="text-xs font-semibold uppercase tracking-[0.15em] text-teal-600">Account</p>
         <h1 className="mt-1 text-2xl font-bold text-slate-900">Login</h1>
         <p className="mt-2 text-sm text-slate-600">Sign in to access your resumes.</p>

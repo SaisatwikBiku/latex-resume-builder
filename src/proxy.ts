@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
-const PUBLIC_PATHS = new Set(["/login", "/register"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/register"]);
 
 function isPublicPath(pathname: string) {
   if (PUBLIC_PATHS.has(pathname)) return true;
@@ -17,7 +17,7 @@ export default auth((req) => {
   if (isPublicPath(pathname)) {
     if (req.auth && (pathname === "/login" || pathname === "/register")) {
       const callbackUrl = nextUrl.searchParams.get("callbackUrl");
-      const redirectTo = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/";
+      const redirectTo = callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/repositories";
       return NextResponse.redirect(new URL(redirectTo, req.url));
     }
     return NextResponse.next();

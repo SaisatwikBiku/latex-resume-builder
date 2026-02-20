@@ -123,8 +123,8 @@ export default function CommitEditorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#d9f5ee_0%,#f8fafc_42%,#ffffff_100%)] text-slate-900">
+      <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/85 backdrop-blur">
         <div className="mx-auto max-w-[1600px] px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
@@ -133,48 +133,48 @@ export default function CommitEditorPage() {
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
-              className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
               Logout
             </button>
           </div>
           <div className="mt-2 flex items-center gap-2 overflow-x-auto pb-1 sm:gap-3 sm:overflow-visible sm:pb-0">
-            <Link href="/" className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+            <Link href="/repositories" className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
               Repositories
             </Link>
-            <Link href={`/repositories/${repoId}`} className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+            <Link href={`/repositories/${repoId}`} className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
               Workspace
             </Link>
-            <Link href={`/repositories/${repoId}/commits`} className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+            <Link href={`/repositories/${repoId}/commits`} className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
               Commits
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:mb-6">
+      <main className="mx-auto max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+        <section className="mb-4 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-lg shadow-slate-200/60 backdrop-blur sm:mb-6 sm:p-5">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_auto_auto]">
             <label className="text-xs font-medium text-slate-700">
               Commit Title
               <input
                 value={commitTitle}
                 onChange={(e) => setCommitTitle(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
                 disabled={isLoading}
               />
             </label>
             <button
               onClick={() => void handleSaveCommit()}
               disabled={isSaving || isLoading}
-              className="h-10 w-full self-end rounded-lg bg-teal-600 px-4 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60 sm:w-auto"
+              className="h-10 w-full self-end rounded-xl bg-teal-600 px-4 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60 sm:w-auto"
             >
               {isSaving ? "Saving..." : "Save Commit"}
             </button>
             <button
               onClick={() => void handleDownload()}
               disabled={isGenerating || isLoading}
-              className="h-10 w-full self-end rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60 sm:w-auto"
+              className="h-10 w-full self-end rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60 sm:w-auto"
             >
               {isGenerating ? "Generating..." : "Download PDF"}
             </button>
@@ -189,12 +189,12 @@ export default function CommitEditorPage() {
           </div>
         ) : (
           <div className="grid gap-4 sm:gap-6 xl:grid-cols-[minmax(0,1fr)_600px]">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+            <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-lg shadow-slate-200/60 backdrop-blur sm:p-6">
               <ResumeForm value={data} onChange={setData} />
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm xl:sticky xl:top-24 xl:self-start">
-              <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 sm:px-6 sm:py-4">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 shadow-lg shadow-slate-200/60 backdrop-blur xl:sticky xl:top-24 xl:self-start">
+              <div className="border-b border-slate-200 bg-slate-50/90 px-4 py-3 sm:px-6 sm:py-4">
                 <p className="text-sm font-semibold text-slate-900">Preview</p>
               </div>
               <div className="p-3 sm:p-6">
