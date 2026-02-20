@@ -56,7 +56,7 @@ export async function POST(req: Request) {
       "latexmk",
       ["-pdf", "-interaction=nonstopmode", "-halt-on-error", "-no-shell-escape", "resume.tex"],
       tmpDir,
-      15000
+      60000
     );
 
     const pdf = await fs.readFile(path.join(tmpDir, "resume.pdf"));
