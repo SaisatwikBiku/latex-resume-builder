@@ -26,6 +26,7 @@ export default function CommitEditorPage() {
 
   const [repositoryName, setRepositoryName] = useState("Repository");
   const [commitTitle, setCommitTitle] = useState("Commit");
+  const [company, setCompany] = useState<string | null>(null);
   const [data, setData] = useState<ResumeData>(defaultData);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +58,7 @@ export default function CommitEditorPage() {
         if (!mounted) return;
         setRepositoryName(repoPayload.repository?.name ?? "Repository");
         setCommitTitle(commitPayload.title ?? "Commit");
+        setCompany(commitPayload.company ?? null);
         setData((commitPayload.data ?? defaultData) as ResumeData);
       } catch (e: unknown) {
         if (mounted) setError(e instanceof Error ? e.message : "Failed to load commit.");
@@ -130,6 +132,11 @@ export default function CommitEditorPage() {
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Commit Editor</p>
               <h1 className="truncate text-base font-bold sm:text-lg">{repositoryName}</h1>
+                {company && (
+                  <div className="mt-1">
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">{company}</span>
+                  </div>
+                )}
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}

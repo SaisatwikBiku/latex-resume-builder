@@ -10,6 +10,7 @@ type CommitSummary = {
   id: string;
   title: string;
   versionNumber: number;
+  company?: string | null;
   updatedAt?: string | null;
 };
 
@@ -160,7 +161,7 @@ export default function CommitsPage() {
                   key={commit.id}
                   className="relative flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div className="min-w-0">
+                    <div className="min-w-0">
                     <Link
                       href={`/repositories/${repoId}/commits/${commit.id}`}
                       className="font-semibold text-slate-900 underline-offset-4 hover:underline"
@@ -168,6 +169,11 @@ export default function CommitsPage() {
                       {commit.title}
                     </Link>
                     <p className="text-xs text-slate-500">Commit #{commit.versionNumber}</p>
+                    {commit.company && (
+                      <div className="mt-1">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">{commit.company}</span>
+                      </div>
+                    )}
                   </div>
                   <div className="absolute right-3 top-3 flex items-center gap-2 sm:static sm:shrink-0">
                     <button

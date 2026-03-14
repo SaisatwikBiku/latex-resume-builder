@@ -9,6 +9,11 @@ function normalizeTitle(value: unknown) {
   return value.trim().slice(0, 120);
 }
 
+function normalizeCompany(value: unknown) {
+  if (typeof value !== "string") return "";
+  return value.trim().slice(0, 200);
+}
+
 export async function GET(_req: Request, context: { params: Promise<{ repoId: string }> }) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -42,6 +47,7 @@ export async function GET(_req: Request, context: { params: Promise<{ repoId: st
       id: String(version._id),
       title: normalizeTitle(version.title) || `Version ${version.versionNumber ?? 1}`,
       versionNumber: version.versionNumber ?? 1,
+      company: version.company ?? null,
       createdAt: version.createdAt ?? null,
       updatedAt: version.updatedAt ?? null,
     })),
@@ -63,6 +69,7 @@ export async function POST(req: Request, context: { params: Promise<{ repoId: st
     const body = await req.json();
     const title = normalizeTitle(body?.title) || "New Version";
     const data = resumeSchema.parse(body?.data);
+    const company = normalizeCompany(body?.company) || null;
 
     const db = await getDb();
     const repoObjectId = new ObjectId(repoId);
@@ -89,6 +96,7 @@ export async function POST(req: Request, context: { params: Promise<{ repoId: st
       title,
       versionNumber: nextVersionNumber,
       data,
+      company,
       createdAt: now,
       updatedAt: now,
     });

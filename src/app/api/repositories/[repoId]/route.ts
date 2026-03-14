@@ -29,6 +29,14 @@ export async function GET(_req: Request, context: { params: Promise<{ repoId: st
     return NextResponse.json({ error: "Repository not found." }, { status: 404 });
   }
 
+  const companies = await db.collection("resume_versions").distinct("company", {
+    repositoryId: new ObjectId(repoId),
+    userId: session.user.id,
+    company: { $ne: null },
+  });
+
+  const filteredCompanies = (companies || []).filter((c) => typeof c === "string" && c.trim().length > 0);
+
   return NextResponse.json({
     repository: {
       id: String(repo._id),
@@ -36,6 +44,7 @@ export async function GET(_req: Request, context: { params: Promise<{ repoId: st
       latestVersionId: repo.latestVersionId ? String(repo.latestVersionId) : null,
       createdAt: repo.createdAt ?? null,
       updatedAt: repo.updatedAt ?? null,
+      companies: filteredCompanies,
     },
   });
 }

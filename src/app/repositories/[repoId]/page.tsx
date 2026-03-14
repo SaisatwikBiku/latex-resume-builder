@@ -26,12 +26,14 @@ export default function RepositoryWorkspacePage() {
   const [repositoryName, setRepositoryName] = useState("Repository");
   const [data, setData] = useState<ResumeData>(defaultData);
   const [commitTitle, setCommitTitle] = useState("");
+  const [companyName, setCompanyName] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCommitting, setIsCommitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [companies, setCompanies] = useState<string[]>([]);
 
   useEffect(() => {
     if (!repoId || status !== "authenticated") return;
@@ -50,7 +52,9 @@ export default function RepositoryWorkspacePage() {
         if (!mounted) return;
         setRepositoryName(repoPayload.repository?.name ?? "Repository");
 
-        const latestVersionId = repoPayload.repository?.latestVersionId as string | null;
+  const latestVersionId = repoPayload.repository?.latestVersionId as string | null;
+  const repoCompanies = (repoPayload.repository?.companies ?? []) as string[];
+  if (repoCompanies && repoCompanies.length) setCompanies(repoCompanies);
         if (!latestVersionId) {
           setData(defaultData);
           return;
@@ -120,11 +124,16 @@ export default function RepositoryWorkspacePage() {
       const res = await fetch(`/api/repositories/${encodeURIComponent(repoId)}/versions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, data }),
+        body: JSON.stringify({ title, data, company: companyName || null }),
       });
       if (!res.ok) throw new Error("Failed to create commit.");
 
+      // update companies list locally if new
+      const trimmed = (companyName || "").trim();
+      if (trimmed && !companies.includes(trimmed)) setCompanies((prev) => [trimmed, ...prev]);
+
       setCommitTitle("");
+      setCompanyName("");
       setMessage("Commit created.");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to create commit.");
@@ -141,6 +150,15 @@ export default function RepositoryWorkspacePage() {
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Repository Workspace</p>
               <h1 className="truncate text-base font-bold sm:text-lg">{repositoryName}</h1>
+                {companies.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {companies.map((c, idx) => (
+                      <span key={idx} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                )}
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
@@ -153,6 +171,12 @@ export default function RepositoryWorkspacePage() {
             <Link href="/repositories" className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
               Repositories
             </Link>
+              <Link
+                href={`/repositories/${repoId}/versions`}
+                className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Show Versions
+              </Link>
             <Link
               href={`/repositories/${repoId}/commits`}
               className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
@@ -165,7 +189,7 @@ export default function RepositoryWorkspacePage() {
 
       <main className="mx-auto max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         <section className="mb-4 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-lg shadow-slate-200/60 backdrop-blur sm:mb-6 sm:p-5">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_auto_auto]">
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-[1fr_auto_auto_auto]">
             <label className="text-xs font-medium text-slate-700">
               Commit Title
               <input
@@ -176,6 +200,18 @@ export default function RepositoryWorkspacePage() {
                 disabled={isLoading}
               />
             </label>
+
+            <label className="text-xs font-medium text-slate-700">
+              Company (optional)
+              <input
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="e.g. Acme Corp"
+                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                disabled={isLoading}
+              />
+            </label>
+
             <button
               onClick={() => void handleCommit()}
               disabled={isCommitting || isLoading}
@@ -183,6 +219,7 @@ export default function RepositoryWorkspacePage() {
             >
               {isCommitting ? "Committing..." : "Commit"}
             </button>
+
             <button
               onClick={() => void handleDownload()}
               disabled={isGenerating || isLoading}

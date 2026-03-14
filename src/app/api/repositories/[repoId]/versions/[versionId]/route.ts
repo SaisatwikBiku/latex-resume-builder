@@ -43,6 +43,7 @@ export async function GET(
     id: String(version._id),
     title: normalizeTitle(version.title) || `Version ${version.versionNumber ?? 1}`,
     versionNumber: version.versionNumber ?? 1,
+    company: version.company ?? null,
     data: parsed.data,
     createdAt: version.createdAt ?? null,
     updatedAt: version.updatedAt ?? null,
