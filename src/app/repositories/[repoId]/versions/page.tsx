@@ -25,8 +25,16 @@ export default function VersionsPage() {
   const [versions, setVersions] = useState<VersionDetail[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // detect mobile viewport and skip heavy diffs UI if small
+    function handleResize() {
+      setIsMobile(typeof window !== "undefined" && window.innerWidth <= 640);
+    }
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
     if (!repoId || status !== "authenticated") return;
 
     let mounted = true;
@@ -76,8 +84,43 @@ export default function VersionsPage() {
 
     return () => {
       mounted = false;
+      window.removeEventListener("resize", () => {});
     };
   }, [repoId, status]);
+
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,#d9f5ee_0%,#f8fafc_42%,#ffffff_100%)] text-slate-900">
+        <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/85 backdrop-blur">
+          <div className="mx-auto max-w-[1100px] px-4 py-3 sm:px-6 lg:px-8">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Versions</p>
+                <h1 className="truncate text-base font-bold sm:text-lg">{repositoryName}</h1>
+              </div>
+              <button
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Logout
+              </button>
+            </div>
+            <div className="mt-2 flex items-center gap-2 overflow-x-auto pb-1 sm:gap-3 sm:overflow-visible sm:pb-0">
+              <Link href="/repositories" className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Repositories</Link>
+              <Link href={`/repositories/${repoId}`} className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Workspace</Link>
+              <Link href={`/repositories/${repoId}/commits`} className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Commits</Link>
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8">
+          <section className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-lg shadow-slate-200/60 backdrop-blur sm:p-5">
+            <p className="text-sm text-slate-600">The Versions view is best viewed on a desktop — please open this page on a larger screen to see diffs between commits.</p>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   function topLevelKeys(data?: ResumeData) {
     if (!data) return [] as string[];
