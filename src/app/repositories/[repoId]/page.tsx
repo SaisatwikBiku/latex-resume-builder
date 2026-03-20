@@ -8,18 +8,22 @@ import type { ResumeData } from "@/lib/resumeSchema";
 import ResumeForm from "@/components/ResumeForm";
 import ResumePreview from "@/components/ResumePreview";
 
-const defaultData: ResumeData = {
-  basics: { name: "Your Name", email: "", phone: "", location: "", website: "", summary: "" },
-  education: [],
-  experience: [],
-  projects: [],
-  skills: [],
-  certifications: [],
-  languages: [],
-};
+function makeDefaultData(name?: string): ResumeData {
+  return {
+    basics: { name: name?.trim() || "Your Name", email: "", phone: "", location: "", website: "", summary: "" },
+    education: [],
+    experience: [],
+    projects: [],
+    skills: [],
+    certifications: [],
+    languages: [],
+  };
+}
+
+const defaultData: ResumeData = makeDefaultData();
 
 export default function RepositoryWorkspacePage() {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
   const params = useParams<{ repoId: string }>();
   const repoId = params?.repoId ?? "";
 
@@ -56,7 +60,7 @@ export default function RepositoryWorkspacePage() {
   const repoCompanies = (repoPayload.repository?.companies ?? []) as string[];
   if (repoCompanies && repoCompanies.length) setCompanies(repoCompanies);
         if (!latestVersionId) {
-          setData(defaultData);
+          setData(makeDefaultData(session?.user?.name as string | undefined));
           return;
         }
 
@@ -150,6 +154,9 @@ export default function RepositoryWorkspacePage() {
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Repository Workspace</p>
               <h1 className="truncate text-base font-bold sm:text-lg">{repositoryName}</h1>
+              {session?.user?.name && (
+                <p className="text-sm text-slate-600">Hi, {String(session.user.name).split(" ")[0]}</p>
+              )}
                 {companies.length > 0 && (
                   <div className="mt-1 flex flex-wrap gap-2">
                     {companies.map((c, idx) => (

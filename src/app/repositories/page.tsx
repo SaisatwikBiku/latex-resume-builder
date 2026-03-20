@@ -12,18 +12,22 @@ type RepositorySummary = {
   updatedAt?: string | null;
 };
 
-const defaultData: ResumeData = {
-  basics: { name: "Your Name", email: "", phone: "", location: "", website: "", summary: "" },
-  education: [],
-  experience: [],
-  projects: [],
-  skills: [],
-  certifications: [],
-  languages: [],
-};
+function makeDefaultData(name?: string): ResumeData {
+  return {
+    basics: { name: name?.trim() || "Your Name", email: "", phone: "", location: "", website: "", summary: "" },
+    education: [],
+    experience: [],
+    projects: [],
+    skills: [],
+    certifications: [],
+    languages: [],
+  };
+}
+
+const defaultData: ResumeData = makeDefaultData();
 
 export default function Page() {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
   const [repositories, setRepositories] = useState<RepositorySummary[]>([]);
   const [newRepoName, setNewRepoName] = useState("");
   const [openMenuRepoId, setOpenMenuRepoId] = useState<string | null>(null);
@@ -56,10 +60,11 @@ export default function Page() {
     setIsCreating(true);
     setError(null);
     try {
+      const initialData = makeDefaultData(session?.user?.name as string | undefined);
       const res = await fetch("/api/repositories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, initialData: defaultData }),
+        body: JSON.stringify({ name, initialData }),
       });
       if (!res.ok) throw new Error("Failed to create repository.");
 
@@ -116,6 +121,9 @@ export default function Page() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Repositories</p>
             <h1 className="text-lg font-bold sm:text-xl">LaTeX Resume Builder</h1>
+            {session?.user?.name && (
+              <p className="text-sm text-slate-600">Welcome, {String(session.user.name).split(" ")[0]}</p>
+            )}
           </div>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}

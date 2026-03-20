@@ -5,6 +5,7 @@ import { compare } from "bcryptjs";
 import { z } from "zod";
 import { mongoClient } from "@/lib/mongodb";
 import { getDb } from "@/lib/db";
+import { ObjectId } from "mongodb";
 import { checkRateLimit, getClientIp } from "@/lib/security";
 
 const loginSchema = z.object({
@@ -56,6 +57,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user?.id) token.userId = user.id;
+      // populate name on the token so session can expose it
+      try {
+        if (token.userId && !token.name) {
+          const db = await getDb();
+          const u = await db.collection("users").findOne({ _id: new ObjectId(token.userId) });
+          if (u?.name) token.name = u.name;
+        }
+      } catch {
+        // ignore failures here
+      }
       return token;
     },
     async session({ session, token }) {
@@ -63,6 +74,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user = {
           ...session.user,
           id: String(token.userId),
+        };
+      }
+      if (token?.name) {
+        session.user = {
+          ...session.user,
+          name: String(token.name),
         };
       }
       return session;

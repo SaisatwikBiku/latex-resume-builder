@@ -64,7 +64,13 @@ function LoginForm() {
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,#d9f5ee_0%,#f8fafc_42%,#ffffff_100%)] px-4 py-10">
-      <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200/80 bg-white/90 p-8 shadow-lg shadow-slate-200/60 backdrop-blur">
+      <div className="relative mx-auto w-full max-w-md rounded-2xl border border-slate-200/80 bg-white/90 p-8 shadow-lg shadow-slate-200/60 backdrop-blur">
+        <Link
+          href="/"
+          className="absolute right-4 top-4 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          Home
+        </Link>
         <p className="text-xs font-semibold uppercase tracking-[0.15em] text-teal-600">Account</p>
         <h1 className="mt-1 text-2xl font-bold text-slate-900">Login</h1>
         <p className="mt-2 text-sm text-slate-600">Sign in to access your resumes.</p>

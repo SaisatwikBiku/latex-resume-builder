@@ -7,7 +7,7 @@ import { checkRateLimit, getClientIp } from "@/lib/security";
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  name: z.string().min(1).max(100).optional(),
+  name: z.string().min(1).max(100),
 });
 
 export async function POST(req: Request) {
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
     await users.insertOne({
       email,
-      name: parsed.name?.trim() || "",
+      name: parsed.name.trim(),
       password: passwordHash,
       emailVerified: null,
       image: null,

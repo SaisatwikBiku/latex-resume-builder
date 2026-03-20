@@ -87,20 +87,20 @@ export default async function LandingPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">LaTeX Resume Builder</p>
           <h1 className="text-lg font-bold">Version control for your resume</h1>
         </div>
-        <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
-          <Link
-            href={session ? "/repositories" : "/login"}
-            className="whitespace-nowrap rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            {session ? "Open App" : "Login"}
-          </Link>
-          <Link
-            href={session ? "/repositories" : "/register"}
-            className="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
-          >
-            {session ? "Go to Repositories" : "Create account"}
-          </Link>
-        </div>
+          <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
+            <Link
+              href="/login"
+              className="whitespace-nowrap rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
+            >
+              Create account
+            </Link>
+          </div>
       </header>
 
       <main className="mx-auto grid w-full max-w-[1100px] gap-10 px-4 pb-16 pt-4 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-start lg:px-8 lg:pb-20 lg:pt-8">
@@ -116,18 +116,8 @@ export default async function LandingPage() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              href={session ? "/repositories" : "/register"}
-              className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
-            >
-              {session ? "Open your repositories" : "Start free"}
-            </Link>
-            <Link
-              href={session ? "/repositories" : "/login"}
-              className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              {session ? "Continue editing" : "Sign in"}
-            </Link>
+            <Link href="/register" className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">Start free</Link>
+            <Link href="/login" className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Sign in</Link>
           </div>
 
           <ul className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -222,18 +212,8 @@ export default async function LandingPage() {
               Start with one repository, create commits for each opportunity, and export polished PDFs on demand.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              <Link
-                href={session ? "/repositories" : "/register"}
-                className="whitespace-nowrap rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100"
-              >
-                {session ? "Open app" : "Create account"}
-              </Link>
-              <Link
-                href={session ? "/repositories" : "/login"}
-                className="rounded-xl border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-800"
-              >
-                {session ? "Continue" : "Login"}
-              </Link>
+              <Link href="/register" className="whitespace-nowrap rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-100">Create account</Link>
+              <Link href="/login" className="rounded-xl border border-slate-600 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-800">Login</Link>
             </div>
           </div>
         </div>

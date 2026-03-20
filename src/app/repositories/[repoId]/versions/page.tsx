@@ -28,15 +28,6 @@ export default function VersionsPage() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // detect mobile viewport and skip heavy diffs UI if small
-    function handleResize() {
-      setIsMobile(typeof window !== "undefined" && window.innerWidth <= 640);
-    }
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    if (!repoId || status !== "authenticated") return;
-
     let mounted = true;
 
     async function load() {
@@ -84,9 +75,18 @@ export default function VersionsPage() {
 
     return () => {
       mounted = false;
-      window.removeEventListener("resize", () => {});
     };
   }, [repoId, status]);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(typeof window !== "undefined" && window.innerWidth <= 640);
+    }
+    // run on mount
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   if (isMobile) {
     return (
@@ -133,10 +133,83 @@ export default function VersionsPage() {
     return keys.filter((k) => JSON.stringify((a as any)[k]) !== JSON.stringify((b as any)[k]));
   }
 
+  function DiffBlock({ oldVal, newVal }: { oldVal: unknown; newVal: unknown }) {
+    const oldStr = oldVal === undefined ? "" : JSON.stringify(oldVal, null, 2);
+    const newStr = newVal === undefined ? "" : JSON.stringify(newVal, null, 2);
+
+    const oldLines = oldStr.split("\n");
+    const newLines = newStr.split("\n");
+    const max = Math.max(oldLines.length, newLines.length);
+
+    return (
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div>
+          <div className="text-xs text-slate-500">Older</div>
+          <div className="max-h-48 overflow-auto rounded border bg-white p-2 text-xs font-mono">
+            {Array.from({ length: max }).map((_, i) => {
+              const o = oldLines[i] ?? "";
+              const n = newLines[i] ?? "";
+              const changed = o !== n;
+              return (
+                <div
+                  key={i}
+                  className={changed ? "rounded px-1 py-0.5 bg-rose-50 text-rose-800" : "px-1"}
+                  style={{ whiteSpace: "pre" }}
+                >
+                  {o || ""}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <div className="text-xs text-slate-500">Newer</div>
+          <div className="max-h-48 overflow-auto rounded border bg-white p-2 text-xs font-mono">
+            {Array.from({ length: max }).map((_, i) => {
+              const o = oldLines[i] ?? "";
+              const n = newLines[i] ?? "";
+              const changed = o !== n;
+              return (
+                <div
+                  key={i}
+                  className={changed ? "rounded px-1 py-0.5 bg-emerald-50 text-emerald-800" : "px-1"}
+                  style={{ whiteSpace: "pre" }}
+                >
+                  {n || ""}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
-      <div className="p-6">
-        <p className="text-sm text-slate-600">Loading versions...</p>
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,#d9f5ee_0%,#f8fafc_42%,#ffffff_100%)] text-slate-900">
+        <header className="sticky top-0 z-20 border-b border-slate-200/80 bg-white/85 backdrop-blur">
+          <div className="mx-auto max-w-[1100px] px-4 py-3 sm:px-6 lg:px-8">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Versions</p>
+                <h1 className="truncate text-base font-bold sm:text-lg">{repositoryName}</h1>
+              </div>
+            </div>
+            <div className="mt-2 flex items-center gap-2 overflow-x-auto pb-1 sm:gap-3 sm:overflow-visible sm:pb-0">
+              <Link href="/repositories" className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Repositories</Link>
+              <Link href={`/repositories/${repoId}`} className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Workspace</Link>
+              <Link href={`/repositories/${repoId}/commits`} className="shrink-0 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Commits</Link>
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-[1100px] px-4 py-6 sm:px-6 lg:px-8">
+          <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-lg shadow-slate-200/60 backdrop-blur sm:p-8">
+            <p className="text-sm text-slate-600">Loading versions...</p>
+          </div>
+        </main>
       </div>
     );
   }
@@ -240,16 +313,9 @@ export default function VersionsPage() {
                   pair.changed.map((section) => (
                     <div key={section} className="mb-3">
                       <div className="text-sm font-medium text-slate-800">{section}</div>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div>
-                          <div className="text-xs text-slate-500">Older</div>
-                          <pre className="max-h-48 overflow-auto rounded border bg-white p-2 text-xs">{JSON.stringify((pair.older.data as any)?.[section], null, 2)}</pre>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <DiffBlock oldVal={(pair.older.data as any)?.[section]} newVal={(pair.newer.data as any)?.[section]} />
                         </div>
-                        <div>
-                          <div className="text-xs text-slate-500">Newer</div>
-                          <pre className="max-h-48 overflow-auto rounded border bg-white p-2 text-xs">{JSON.stringify((pair.newer.data as any)?.[section], null, 2)}</pre>
-                        </div>
-                      </div>
                     </div>
                   ))
                 )}

@@ -28,6 +28,11 @@ export default function RegisterPage() {
       return;
     }
 
+    if (!name || !name.trim()) {
+      setError("Name is required.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const registerRes = await fetch("/api/auth/register", {
@@ -64,14 +69,20 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,#d9f5ee_0%,#f8fafc_42%,#ffffff_100%)] px-4 py-10">
-      <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200/80 bg-white/90 p-8 shadow-lg shadow-slate-200/60 backdrop-blur">
+      <div className="relative mx-auto w-full max-w-md rounded-2xl border border-slate-200/80 bg-white/90 p-8 shadow-lg shadow-slate-200/60 backdrop-blur">
+        <Link
+          href="/"
+          className="absolute right-4 top-4 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          Home
+        </Link>
         <p className="text-xs font-semibold uppercase tracking-[0.15em] text-teal-600">Account</p>
         <h1 className="mt-1 text-2xl font-bold text-slate-900">Register</h1>
         <p className="mt-2 text-sm text-slate-600">Create an account to save and manage resumes.</p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <label className="block text-sm font-medium text-slate-800">
-            Name (optional)
+            Name
             <input
               type="text"
               autoComplete="name"
